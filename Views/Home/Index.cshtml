@@ -1,0 +1,152 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        Facturas
+    </div>
+    <div class="card-body">
+
+      <div class="row">
+          <div class="col-sm-4">
+              <label class="form-label">Numero Documento</label>
+              <input class="form-control form-control-sm" type="text" id="txtnumerodocumento">
+          </div>
+          <div class="col-sm-4">
+              <label class="form-label">Razon Social</label>
+              <input class="form-control form-control-sm" type="text" id="txtrazonsocial">
+          </div>
+      </div>
+      <hr />
+       <div class="row align-items-end">
+                <div class="col-sm-3">
+                    <label class="form-label">Producto</label>
+                     <input class="form-control form-control-sm" type="text" id="txtproducto">
+                </div>
+                <div class="col-sm-3">
+                    <label class="form-label">Precio</label>
+                    <input class="form-control form-control-sm" type="text" id="txtprecio">
+                </div>
+                <div class="col-sm-3">
+                     <label class="form-label">Cantidad</label>
+                    <input class="form-control form-control-sm" type="text" id="txtcantidad">
+                </div>
+                <div class="col-sm-3">
+                     <button class="btn btn-success btn-sm" id="btnAgregar">Agregar</button>
+                    <button class="btn btn-primary btn-sm" id="btnConfirmar">Confirmar</button>
+                </div>
+       </div>
+       <hr />
+        <div class="row">
+                <div class="col-sm-12">
+                     <table class="table table-bordered table-sm" id="tbDetalle">
+                      <thead>
+                          <tr class="table-dark">
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Total</th>
+                            </tr>
+                      </thead>
+                      <tbody>
+
+                      </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+  </div>
+</div>
+
+
+@section Scripts{
+
+    <script>
+
+
+        $("#btnAgregar").on("click",function(){
+        
+        
+            var total  = parseFloat( $("#txtprecio").val()) * parseFloat(  $("#txtcantidad").val() )
+
+
+            $("#tbDetalle tbody").append(
+            
+                $("<tr>").append(
+                    $("<td>").text($("#txtproducto").val()),
+                    $("<td>").text($("#txtprecio").val()),
+                    $("<td>").text($("#txtcantidad").val()),
+                    $("<td>").text(total),
+                )
+
+            )
+
+            $("#txtproducto").val("")
+            $("#txtprecio").val("")
+            $("#txtcantidad").val("")
+            $("#txtproducto").focus();
+        })
+
+        $("#btnConfirmar").on("click",function(){
+        
+            var oDetalleFactura = []
+            var total = 0;
+
+
+            $("#tbProducto > tbody > tr").each(function(i,tr){
+            
+                oDetalleFactura.push(
+                    {
+                        Producto: $(tr).find('td:eq(0)').text(),
+                        Precio: $(tr).find('td:eq(1)').text(),
+                        Cantidad: $(tr).find('td:eq(2)').text(),
+                        Total: $(tr).find('td:eq(3)').text()
+                    
+                    }
+                )
+                total = total + parseFloat( $(tr).find('td:eq(3)').text())
+            
+            })
+
+            var oFacturaViewModel = {
+                oFactura : {
+                    NumeroDocumento : $("#txtnumerodocumento").val(),
+                    RazonSocial : $("#txtrazonsocial").val(),
+                    Total : total
+                },
+                oDetalle : oDetalleFactura
+            }
+
+
+            jQuery.ajax({
+                url : '@Url.Action("Index","Home")',
+                type :"POST",
+                data : JSON.stringify(oFacturaViewModel),
+                datatype : "json",
+                contentType : "application/json; charset=utf-8",
+                success : function(data){
+                
+                    if(data.respuesta){
+                        alert("Factura Registrada")
+
+                        location.reload();
+                    }
+
+                }
+            
+            })
+
+        
+        })
+
+
+
+    </script>
+}
